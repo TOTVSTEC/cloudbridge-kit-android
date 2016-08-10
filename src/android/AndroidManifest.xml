@@ -1,15 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.example.roger.myapplication99">
+    package="<%= id %>">
 
     <application
+		android:name=".<%= name %>Application"
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
+		android:theme="@android:style/Theme.Light.NoTitleBar.Fullscreen" 
+		android:hardwareAccelerated="true"
         android:supportsRtl="true">
 
         <activity
-            android:name=".CloudBridgeActivity"
-            android:label="TestActivity99">
+            android:name=".<%= name %>Activity"
+			android:configChanges="orientation|uiMode|screenLayout|screenSize|smallestScreenSize|locale|fontScale|keyboard|keyboardHidden|navigation" 
+			android:launchMode="singleTop" 
+			android:screenOrientation="unspecified" 
+			android:windowSoftInputMode="adjustPan">
 
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
