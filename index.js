@@ -11,7 +11,7 @@ task.run = function run(cli, projectData) {
     cloudbridge = cli;
     Q = cloudbridge.require('q');
     shelljs = cloudbridge.require('shelljs');
-    utils = cloudbridge.require('/core').utils;
+    utils = cloudbridge.utils;
     data = projectData;
 
     return Q()
