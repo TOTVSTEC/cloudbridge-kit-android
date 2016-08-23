@@ -1,7 +1,7 @@
-package <%= id %>;
+package <%= project.id %>;
 
 import com.totvs.smartclient.SmartClientApplication;
 
-public class <%= name %>Application extends SmartClientApplication {
+public class <%= project.name %>Application extends SmartClientApplication {
 
 }

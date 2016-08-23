@@ -1,21 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="<%= id %>">
+    package="<%= project.id %>">
 
     <application
-		android:name=".<%= name %>Application"
+		android:name=".<%= project.name %>Application"
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
-		android:theme="@android:style/Theme.Light.NoTitleBar.Fullscreen" 
+		android:theme="@android:style/Theme.Light.NoTitleBar.Fullscreen"
 		android:hardwareAccelerated="true"
         android:supportsRtl="true">
 
         <activity
-            android:name=".<%= name %>Activity"
-			android:configChanges="orientation|uiMode|screenLayout|screenSize|smallestScreenSize|locale|fontScale|keyboard|keyboardHidden|navigation" 
-			android:launchMode="singleTop" 
-			android:screenOrientation="unspecified" 
+            android:name=".<%= project.name %>Activity"
+			android:configChanges="orientation|uiMode|screenLayout|screenSize|smallestScreenSize|locale|fontScale|keyboard|keyboardHidden|navigation"
+			android:launchMode="singleTop"
+			android:screenOrientation="unspecified"
 			android:windowSoftInputMode="adjustPan">
 
             <intent-filter>
