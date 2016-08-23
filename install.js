@@ -40,7 +40,7 @@ function copyDependencies() {
 
 function moveJavaToPackage() {
 	var src = path.join(projectDir, 'src', 'android', 'java'),
-		packagePath = path.join.apply(path, data.id.split('.')),
+		packagePath = path.join.apply(path, data.project.id.split('.')),
 		target = path.join(src, packagePath);
 
 	shelljs.mkdir('-p', target);
@@ -48,7 +48,7 @@ function moveJavaToPackage() {
 	var files = shelljs.ls(path.join(src, '*.java'));
 
 	for (var i = 0; i < files.length; i++) {
-		var targetFile = path.join(target, data.name + path.basename(files[i]));
+		var targetFile = path.join(target, data.project.name + path.basename(files[i]));
 
 		shelljs.mv(files[i], targetFile);
 	}
