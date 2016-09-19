@@ -31,10 +31,14 @@ function copySources() {
 
 function copyDependencies() {
 	var src = path.join(__dirname, 'build', '*'),
-		target = path.join(projectDir, 'build');
+		target = path.join(projectDir, 'build'),
+		assets = path.join(target, 'android', 'assets'),
+		extensions = /\.(ini)/;
 
 	shelljs.mkdir('-p', target);
 	shelljs.cp('-Rf', src, target);
+
+	utils.copyTemplate(assets, assets, data, extensions);
 };
 
 function moveJavaToPackage() {
