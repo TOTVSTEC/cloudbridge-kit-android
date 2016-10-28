@@ -16,7 +16,7 @@
 			android:configChanges="orientation|uiMode|screenLayout|screenSize|smallestScreenSize|locale|fontScale|keyboard|keyboardHidden|navigation"
 			android:launchMode="singleTop"
 			android:screenOrientation="unspecified"
-			android:windowSoftInputMode="adjustPan">
+			android:windowSoftInputMode="adjustResize">
 
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
