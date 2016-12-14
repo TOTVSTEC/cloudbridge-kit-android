@@ -17,8 +17,12 @@ task.run = function run(cli, targetPath) {
 
 	return Q()
 		.then(copySources)
-		.then(copyDependencies)
-		.then(moveJavaToPackage);
+		.then(moveJavaToPackage)
+		.then(function() {
+			var restoreTask = require('./restore');
+
+			return restoreTask.run(cli, targetPath);
+		});
 };
 
 function copySources() {
@@ -27,19 +31,7 @@ function copySources() {
 		extensions = /\.(gradle|xml|java)/;
 
 	utils.copyTemplate(src, target, data, extensions);
-};
-
-function copyDependencies() {
-	var src = path.join(__dirname, 'build', '*'),
-		target = path.join(projectDir, 'build'),
-		assets = path.join(target, 'android', 'assets'),
-		extensions = /\.(ini)/;
-
-	shelljs.mkdir('-p', target);
-	shelljs.cp('-Rf', src, target);
-
-	utils.copyTemplate(assets, assets, data, extensions);
-};
+}
 
 function moveJavaToPackage() {
 	var src = path.join(projectDir, 'src', 'android', 'java'),
