@@ -1,50 +1,123 @@
-var task = module.exports,
-	path = require('path'),
+var path = require('path'),
 	Q = null,
 	shelljs = null,
 	utils = null,
-	data = null,
-	projectDir = null;
+	prompt = null;
 
-task.run = function run(cli, targetPath) {
-	projectDir = targetPath;
-	Q = cli.require('q');
-	shelljs = cli.require('shelljs');
-	utils = cli.utils;
-	data = {
-		project: require(path.join(targetPath, 'cloudbridge.json'))
-	};
+class InstallTask {
 
-	return Q()
-		.then(copySources)
-		.then(moveJavaToPackage)
-		.then(function() {
-			var restoreTask = require('./restore');
+	constructor(cli, targetPath, projectData) {
+		this.cli = cli;
+		this.projectDir = targetPath;
+		this.projectData = projectData;
 
-			return restoreTask.run(cli, targetPath);
-		});
-};
+		Q = cli.require('q');
+		shelljs = cli.require('shelljs');
+		prompt = cli.require('prompt');
+		utils = cli.utils;
+	}
 
-function copySources() {
-	var src = path.join(__dirname, 'src'),
-		target = path.join(projectDir, 'src'),
-		extensions = /\.(gradle|xml|java)/;
+	run() {
+		var self = this;
 
-	utils.copyTemplate(src, target, data, extensions);
-}
+		return Q()
+			.then(function() {
+				return self.checkForExistingFiles();
+			})
+			.then(function(result) {
+				var promise = null;
 
-function moveJavaToPackage() {
-	var src = path.join(projectDir, 'src', 'android', 'java'),
-		packagePath = path.join.apply(path, data.project.id.split('.')),
+				if (result.overwrite) {
+					promise = self.deleteSources();
+				}
+				else if (result.rename) {
+					promise = self.renameSources();
+				}
+
+				if (promise !== null) {
+					return promise.then(function() {
+						self.copySources();
+					});
+				}
+			})
+			.then(function() {
+				var restoreTask = require('./restore');
+
+				return restoreTask.run(this.cli, this.projectDir);
+			});
+	}
+
+	copySources() {
+		var src = path.join(__dirname, 'src'),
+			target = path.join(this.projectDir, 'src'),
+			extensions = /\.(gradle|xml|java)/,
+			packagePath;
+
+		utils.copyTemplate(src, target, {
+			project: this.projectData
+		}, extensions);
+
+		src = path.join(this.projectDir, 'src', 'android', 'java');
+		packagePath = path.join.apply(path, this.projectData.id.split('.'));
 		target = path.join(src, packagePath);
 
-	shelljs.mkdir('-p', target);
+		shelljs.mkdir('-p', target);
 
-	var files = shelljs.ls(path.join(src, '*.java'));
+		var files = shelljs.ls(path.join(src, '*.java'));
 
-	for (var i = 0; i < files.length; i++) {
-		var targetFile = path.join(target, data.project.name + path.basename(files[i]));
+		for (var i = 0; i < files.length; i++) {
+			var targetFile = path.join(target, this.projectData.name + path.basename(files[i]));
 
-		shelljs.mv(files[i], targetFile);
+			shelljs.mv(files[i], targetFile);
+		}
+	}
+
+	checkForExistingFiles() {
+		var q = Q.defer();
+		var targetPath = path.join(this.projectDir, 'src', 'android');
+
+		console.log('The directory'.error.bold, targetPath, 'already exists.'.error.bold);
+		console.log('Would you like to overwrite the directory with this new project?');
+
+		var options = {
+			properties: {
+				areYouSure: {
+					name: 'areYouSure',
+					description: '(yes/no):'.yellow.bold,
+					required: true
+				}
+			}
+		};
+
+		//prompt.override = _argv;
+		prompt.message = '';
+		prompt.delimiter = '';
+		prompt.start();
+
+		prompt.get({ properties: promptProperties }, function(err, promptResult) {
+			if (err && err.message !== 'canceled') {
+				q.reject(err);
+
+				return console.error(err);
+			}
+			else if (err && err.message == 'canceled') {
+				return q.resolve(false);
+			}
+
+			var areYouSure = promptResult.areYouSure.toLowerCase().trim();
+			if (areYouSure == 'yes' || areYouSure == 'y') {
+				shelljs.rm('-rf', targetPath);
+
+				q.resolve(true);
+			}
+			else {
+				q.resolve(false);
+			}
+		});
+
+
+		return q.promise;
 	}
 }
+
+module.exports = InstallTask;
