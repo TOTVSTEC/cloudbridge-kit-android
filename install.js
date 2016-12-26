@@ -1,8 +1,13 @@
 var path = require('path'),
+	fs = require('fs'),
+	os = require('os'),
 	Q = null,
 	shelljs = null,
 	utils = null,
-	prompt = null;
+	inquirer = null;
+
+const OPTIONS_OVERWIRTE = 0,
+	OPTIONS_RENAME = 1;
 
 class InstallTask {
 
@@ -13,7 +18,7 @@ class InstallTask {
 
 		Q = cli.require('q');
 		shelljs = cli.require('shelljs');
-		prompt = cli.require('prompt');
+		inquirer = cli.require('inquirer');
 		utils = cli.utils;
 	}
 
@@ -24,14 +29,14 @@ class InstallTask {
 			.then(function() {
 				return self.checkForExistingFiles();
 			})
-			.then(function(result) {
+			.then(function(action) {
 				var promise = null;
 
-				if (result.overwrite) {
-					promise = self.deleteSources();
-				}
-				else if (result.rename) {
+				if (action === OPTIONS_RENAME) {
 					promise = self.renameSources();
+				}
+				else {
+					promise = Q();
 				}
 
 				if (promise !== null) {
@@ -43,80 +48,86 @@ class InstallTask {
 			.then(function() {
 				var restoreTask = require('./restore');
 
-				return restoreTask.run(this.cli, this.projectDir);
+				return restoreTask.run(self.cli, self.projectDir);
 			});
 	}
 
 	copySources() {
-		var src = path.join(__dirname, 'src'),
-			target = path.join(this.projectDir, 'src'),
-			extensions = /\.(gradle|xml|java)/,
-			packagePath;
+		var kitSrc = path.join(__dirname, 'src'),
+			projectSrc = path.join(this.projectDir, 'src'),
+			tempFolder = path.join(os.tmpdir(), 'cloudbridge-' + new Date().getTime()),
+			packagePath = path.join.apply(path, this.projectData.id.split('.')),
+			javaDir = path.join(tempFolder, 'src', 'android', 'java'),
+			packageDir = path.join(javaDir, packagePath);
 
-		utils.copyTemplate(src, target, {
-			project: this.projectData
-		}, extensions);
+		shelljs.mkdir('-p', packageDir);
+		shelljs.cp('-Rf', kitSrc, tempFolder);
 
-		src = path.join(this.projectDir, 'src', 'android', 'java');
-		packagePath = path.join.apply(path, this.projectData.id.split('.'));
-		target = path.join(src, packagePath);
-
-		shelljs.mkdir('-p', target);
-
-		var files = shelljs.ls(path.join(src, '*.java'));
+		var files = shelljs.ls(path.join(javaDir, '*.java'));
 
 		for (var i = 0; i < files.length; i++) {
-			var targetFile = path.join(target, this.projectData.name + path.basename(files[i]));
+			var targetFile = path.join(packageDir, this.projectData.name + path.basename(files[i]));
 
-			shelljs.mv(files[i], targetFile);
+			shelljs.mv('-f', files[i], targetFile);
 		}
+
+		utils.copyTemplate(tempFolder, this.projectDir, {
+			project: this.projectData
+		}, /\.(gradle|xml|java)/);
+
+		shelljs.rm('-rf', tempFolder);
 	}
 
 	checkForExistingFiles() {
-		var q = Q.defer();
-		var targetPath = path.join(this.projectDir, 'src', 'android');
+		var deferred = Q.defer(),
+			targetPath = path.join(this.projectDir, 'src', 'android');
 
-		console.log('The directory'.error.bold, targetPath, 'already exists.'.error.bold);
-		console.log('Would you like to overwrite the directory with this new project?');
+		if (fs.existsSync(targetPath)) {
+			inquirer.prompt([{
+				type: 'list',
+				name: 'action',
+				message: ['The directory'.error.bold, targetPath, 'already exists.\n'.error.bold].join(' '),
+				choices: [
+					{
+						name: 'Overwrite',
+						value: OPTIONS_OVERWIRTE, //'overwrite',
+						short: '\nOverwriting the existing files...'
+					},
+					{
+						name: 'Rename',
+						value: OPTIONS_RENAME,// 'rename',
+						short: '\nRenaming the existing directory and copying the new files...'
+					},
+					new inquirer.Separator(' ')
+				],
+				default: OPTIONS_RENAME	//'rename'
+			}]).then(function(answers) {
+				deferred.resolve(answers.action);
+			});
+		}
+		else {
+			deferred.resolve({});
+		}
 
-		var options = {
-			properties: {
-				areYouSure: {
-					name: 'areYouSure',
-					description: '(yes/no):'.yellow.bold,
-					required: true
-				}
+		return deferred.promise;
+	}
+
+	renameSources() {
+		var srcPath = path.join(this.projectDir, 'src', 'android'),
+			targetPath = path.join(this.projectDir, 'src', 'android.old');
+
+		if (fs.existsSync(targetPath)) {
+			var count = 1;
+			while (fs.existsSync(targetPath + '.' + count)) {
+				count++;
 			}
-		};
 
-		//prompt.override = _argv;
-		prompt.message = '';
-		prompt.delimiter = '';
-		prompt.start();
+			targetPath += '.' + count;
+		}
 
-		prompt.get({ properties: promptProperties }, function(err, promptResult) {
-			if (err && err.message !== 'canceled') {
-				q.reject(err);
+		shelljs.mv(srcPath, targetPath);
 
-				return console.error(err);
-			}
-			else if (err && err.message == 'canceled') {
-				return q.resolve(false);
-			}
-
-			var areYouSure = promptResult.areYouSure.toLowerCase().trim();
-			if (areYouSure == 'yes' || areYouSure == 'y') {
-				shelljs.rm('-rf', targetPath);
-
-				q.resolve(true);
-			}
-			else {
-				q.resolve(false);
-			}
-		});
-
-
-		return q.promise;
+		return Q();
 	}
 }
 
