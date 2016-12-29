@@ -9,6 +9,12 @@ var path = require('path'),
 const OPTIONS_OVERWIRTE = 0,
 	OPTIONS_RENAME = 1;
 
+module.exports.run = function run(cli, targetPath, projectData) {
+	var task = new InstallTask(cli, targetPath, projectData);
+
+	return task.run();
+};
+
 class InstallTask {
 
 	constructor(cli, targetPath, projectData) {
@@ -130,5 +136,3 @@ class InstallTask {
 		return Q();
 	}
 }
-
-module.exports = InstallTask;
