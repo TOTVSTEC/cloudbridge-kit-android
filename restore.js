@@ -6,7 +6,7 @@ var task = module.exports,
 	data = null,
 	projectDir = null;
 
-task.run = function run(cli, targetPath) {
+task.run = function run(cli, targetPath, projectData) {
 	projectDir = targetPath;
 	Q = cli.require('q');
 	shelljs = cli.require('shelljs');
