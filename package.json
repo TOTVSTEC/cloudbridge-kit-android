@@ -20,5 +20,8 @@
       "email": "rogerio.ribeiro@totvs.com.br"
     }
   ],
-  "license": "MIT"
+  "license": "MIT",
+  "scripts": {
+    "release": "npm version patch && npm publish && git push --tags"
+  }
 }
