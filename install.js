@@ -54,7 +54,7 @@ class InstallTask {
 			.then(function() {
 				var restoreTask = require('./restore');
 
-				return restoreTask.run(self.cli, self.projectDir);
+				return restoreTask.run(self.cli, self.projectDir, self.projectData);
 			});
 	}
 
