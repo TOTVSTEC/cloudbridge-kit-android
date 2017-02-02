@@ -11,8 +11,8 @@ task.run = function run(cli, targetPath, projectData) {
 			return remove.run(cli, targetPath, projectData);
 		})
 		.then(function() {
-			var install = require('./install');
+			var restoreTask = require('./restore');
 
-			return install.run(cli, targetPath, projectData);
+			return restoreTask.run(cli, targetPath, projectData);
 		});
 };
