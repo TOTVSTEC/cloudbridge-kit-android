@@ -1,2 +1,4 @@
+node_modules/
 build/android/build
 build/android/.gradle
+*.log
