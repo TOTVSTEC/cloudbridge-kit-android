@@ -18,8 +18,6 @@ public class <%= project.name %>Activity extends SmartClientActivity {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             this.checkPermissions();
         }
-
-        this.setCloudBridgeProgram("<%= project.name %>");
     }
 
     @TargetApi(Build.VERSION_CODES.M)
