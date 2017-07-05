@@ -1,6 +1,6 @@
 {
   "name": "cloudbridge-kit-android",
-  "version": "0.1.7-SNAPSHOT",
+  "version": "0.1.7",
   "description": "A tool for creating and developing CloudBridge mobile apps.",
   "homepage": "http://www.totvs.com/",
   "keywords": [
