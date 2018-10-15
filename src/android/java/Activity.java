@@ -11,38 +11,38 @@ import java.util.ArrayList;
 
 public class <%= project.name %>Activity extends SmartClientActivity {
 
-    @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
+ 	@Override
+ 	public void onCreate(Bundle savedInstanceState) {
+ 	 	super.onCreate(savedInstanceState);
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            this.checkPermissions();
-        }
-    }
+ 	 	if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+ 	 	 	this.checkPermissions();
+ 	 	}
+ 	}
 
-    @TargetApi(Build.VERSION_CODES.M)
-    public void checkPermissions() {
-        ArrayList<String> permissions = new ArrayList<>();
+ 	@TargetApi(Build.VERSION_CODES.M)
+ 	public void checkPermissions() {
+ 	 	ArrayList<String> permissions = new ArrayList<>();
 
-        Context context = this.getApplicationContext();
-        String packageName = context.getPackageName();
+ 	 	Context context = this.getApplicationContext();
+ 	 	String packageName = context.getPackageName();
 
-        try {
-            PackageInfo info = getPackageManager().getPackageInfo(packageName, PackageManager.GET_PERMISSIONS);
+ 	 	try {
+ 	 	 	PackageInfo info = getPackageManager().getPackageInfo(packageName, PackageManager.GET_PERMISSIONS);
 
-            if (info.requestedPermissions != null) {
-                for (String p : info.requestedPermissions) {
-                    if (this.checkSelfPermission(p) != PackageManager.PERMISSION_GRANTED)
-                        permissions.add(p);
-                }
-            }
+ 	 	 	if (info.requestedPermissions != null) {
+ 	 	 	 	for (String p : info.requestedPermissions) {
+ 	 	 	 	 	if (this.checkSelfPermission(p) != PackageManager.PERMISSION_GRANTED)
+ 	 	 	 	 	 	permissions.add(p);
+ 	 	 	 	}
+ 	 	 	}
 
-            if (permissions.size() > 0) {
-                this.requestPermissions(permissions.toArray(new String[0]), 999);
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
+ 	 	 	if (permissions.size() > 0) {
+ 	 	 	 	this.requestPermissions(permissions.toArray(new String[0]), 999);
+ 	 	 	}
+ 	 	} catch (Exception e) {
+ 	 	 	e.printStackTrace();
+ 	 	}
+ 	}
 
 }
